@@ -282,9 +282,9 @@ static void update_tail(game_state_t* state, int snum) {
   //printf("next tail: %c\n", next);
   set_board_at(state, t_x_pos, t_y_pos, body_to_tail(next));
   //printf("after updating tail\n");
-  for (rows = 0; rows < state->y_size; rows += 1) {
-    printf("%s", state->board[rows]);
-  }
+  //for (rows = 0; rows < state->y_size; rows += 1) {
+  //  printf("%s", state->board[rows]);
+  //}
   
   //printf("coords: (%d, %d), char: %c\n", t_x_pos, t_y_pos, get_board_at(state, t_x_pos, t_y_pos));
   //set_board_at(state, t_x_pos, t_y_pos, body_to_tail(get_board_at(state, t_x_pos, t_y_pos)));
@@ -301,22 +301,35 @@ void update_state(game_state_t* state, int (*add_food)(game_state_t* state)) {
   int counter;
   int fruit_eaten;
   int total_sneks;
+  int rows;
 
   printf("at update_state\n");
   fruit_eaten = 0;
   
   total_sneks = state->num_snakes;
 
-  for (counter = 0; counter < total_sneks; state += 1) {
+  for (counter = 0; counter < total_sneks; counter += 1) {
+    printf("start counter = %d\n", counter);
+    for (rows = 0; rows < state->y_size; rows += 1) {
+      printf("%s", state->board[rows]);
+    }
     if (next_square(state, counter) == '*') {
       fruit_eaten = 1;
     }
     update_head(state, counter);
-    if (fruit_eaten) {
+    if (fruit_eaten == 0) {
+      printf("update tail triggered\n");
       update_tail(state, counter);
-      add_food(state);
+    } 
+    else {
       fruit_eaten = 0;
+      add_food(state);
     }
+    printf("after updates\n");
+    for (rows = 0; rows < state->y_size; rows += 1) {
+      printf("%s", state->board[rows]);
+    }
+    printf("end counter = %d\n", counter);
   }
 
   printf("at end update_state\n");
