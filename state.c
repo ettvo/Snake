@@ -266,16 +266,25 @@ static void update_tail(game_state_t* state, int snum) {
   t_y_pos = state->snakes[snum].tail_y;
   tail = get_board_at(state, t_x_pos, t_y_pos);
   set_board_at(state, t_x_pos, t_y_pos, ' ');
-  set_board_at(state, t_x_pos + incr_x(tail), t_y_pos + incr_y(tail), tail);
-  printf("after updating tail and body\n");
+  printf("after blanking tail\n");
   for (rows = 0; rows < state->y_size; rows += 1) {
     printf("%s", state->board[rows]);
   }
+
   state->snakes[snum].tail_x += incr_x(tail);
   state->snakes[snum].tail_y += incr_y(tail);
-
+  t_x_pos = state->snakes[snum].tail_x;
+  t_y_pos = state->snakes[snum].tail_y;
+  printf("expected tail: %c\n", tail);
+  set_board_at(state, t_x_pos, t_y_pos, tail);
+  printf("after updating tail\n");
+  for (rows = 0; rows < state->y_size; rows += 1) {
+    printf("%s", state->board[rows]);
+  }
+  
   printf("coords: (%d, %d), char: %c\n", t_x_pos, t_y_pos, get_board_at(state, t_x_pos, t_y_pos));
-  set_board_at(state, t_x_pos, t_y_pos, body_to_tail(get_board_at(state, t_x_pos, t_y_pos)));
+  //set_board_at(state, t_x_pos, t_y_pos, body_to_tail(get_board_at(state, t_x_pos, t_y_pos)));
+  
   printf("at end update_tail\n");
   // always shrinks tail if called
 
@@ -289,7 +298,7 @@ void update_state(game_state_t* state, int (*add_food)(game_state_t* state)) {
   int fruit_eaten;
   int total_sneks;
 
-  //printf("at update_state\n");
+  printf("at update_state\n");
   fruit_eaten = 0;
   
   total_sneks = state->num_snakes;
@@ -301,10 +310,11 @@ void update_state(game_state_t* state, int (*add_food)(game_state_t* state)) {
     update_head(state, counter);
     if (fruit_eaten) {
       add_food(state);
+      fruit_eaten = 0;
     }
   }
 
-  //printf("at update_state\n");
+  printf("at end update_state\n");
 }
 
 /* Task 5 */
