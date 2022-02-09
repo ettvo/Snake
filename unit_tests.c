@@ -315,11 +315,18 @@ bool test_next_square_board_2() {
   #            #
   ##############
   */
-
+  int rows;
   game_state_t* state = create_default_state();
 
   // set up board
+
+  for (rows = 0; rows < state->y_size; rows += 1) {
+    printf("%s", state->board[rows]);
+  }
   set_board_at(state, 6, 4, '*');
+  for (rows = 0; rows < state->y_size; rows += 1) {
+    printf("%s", state->board[rows]);
+  }
   save_board(state, "unit-test-out.snk");
 
   // the next square for the snake should be '*'
