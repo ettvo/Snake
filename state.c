@@ -317,14 +317,22 @@ void update_state(game_state_t* state, int (*add_food)(game_state_t* state)) {
       fruit_eaten = 1;
     }
     update_head(state, counter);
-    if (fruit_eaten == 0) {
+    printf("after head but before update tail\n");
+    for (rows = 0; rows < state->y_size; rows += 1) {
+      printf("%s", state->board[rows]);
+    }
+    if (fruit_eaten == 0 && state->snakes[counter].live) {
       printf("update tail triggered\n");
       update_tail(state, counter);
     } 
-    else {
+    else if (state->snakes[counter].live) {
       fruit_eaten = 0;
       add_food(state);
     }
+    //else {
+    //  fruit_eaten = 0;
+    //  add_food(state);
+    //}
     printf("after updates\n");
     for (rows = 0; rows < state->y_size; rows += 1) {
       printf("%s", state->board[rows]);
