@@ -238,7 +238,6 @@ static void update_head(game_state_t* state, int snum) {
     }
     printf("incr x: %d, incr y: %d\n", incr_x(head), incr_y(head));
     printf("at end update_head, going into update_tail\n");
-    update_tail(state, snum);
   }
   else if (next == '*') {
     set_board_at(state, h_x_pos + incr_x(head), h_y_pos + incr_y(head), head);
@@ -309,6 +308,7 @@ void update_state(game_state_t* state, int (*add_food)(game_state_t* state)) {
     }
     update_head(state, counter);
     if (fruit_eaten) {
+      update_tail(state, counter);
       add_food(state);
       fruit_eaten = 0;
     }
