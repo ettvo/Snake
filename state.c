@@ -204,11 +204,11 @@ static void update_head(game_state_t* state, int snum) {
   int h_y_pos;
   char head;
   int rows;
-  printf("at update_head\n");
+  //printf("at update_head\n");
   //looks like it deletes the snake for some reason
-  for (rows = 0; rows < state->y_size; rows += 1) {
-    printf("%s", state->board[rows]);
-  }
+  //for (rows = 0; rows < state->y_size; rows += 1) {
+  //  printf("%s", state->board[rows]);
+  //}
   
   h_x_pos = state->snakes[snum].head_x;
   h_y_pos = state->snakes[snum].head_y;
@@ -220,30 +220,32 @@ static void update_head(game_state_t* state, int snum) {
     // set head to be an x and update the snake to be dead
     set_board_at(state, h_x_pos, h_y_pos, 'x');
     state->snakes[snum].live = 0;
-    printf("at end next == '#' || is_snake(next)\n");
+    //printf("at end next == '#' || is_snake(next)\n");
     // state->num_snakes -= 1;
   }
   else if (next == ' ') {
     // change board, board representation, snake values, and tail
-    printf("before changing in update_head\n");
+    /* printf("before changing in update_head\n");
     for (rows = 0; rows < state->y_size; rows += 1) {
       printf("%s", state->board[rows]);
-    }
+    } */
     set_board_at(state, h_x_pos + incr_x(head), h_y_pos + incr_y(head), head);
     state->snakes[snum].head_x += incr_x(head);
     state->snakes[snum].head_y += incr_y(head);
+    /* 
     printf("after changing in update_head\n");
     for (rows = 0; rows < state->y_size; rows += 1) {
       printf("%s", state->board[rows]);
     }
     printf("incr x: %d, incr y: %d\n", incr_x(head), incr_y(head));
     printf("at end update_head, going into update_tail\n");
+    */
   }
   else if (next == '*') {
     set_board_at(state, h_x_pos + incr_x(head), h_y_pos + incr_y(head), head);
     state->snakes[snum].head_x += incr_x(head);
     state->snakes[snum].head_y += incr_y(head);
-    printf("at end next == '*'\n");
+    //printf("at end next == '*'\n");
     //printf("at end update_head\n");
   }
 
@@ -256,35 +258,38 @@ static void update_tail(game_state_t* state, int snum) {
   int t_x_pos;
   int t_y_pos;
   char tail;
+  char next; // the arrow that tail becomes after shifting to the next position
   int rows;
-  printf("at update_tail\n");
+  /* printf("at update_tail\n");
   for (rows = 0; rows < state->y_size; rows += 1) {
     printf("%s", state->board[rows]);
-  }
+  }*/
   t_x_pos = state->snakes[snum].tail_x;
   t_y_pos = state->snakes[snum].tail_y;
   tail = get_board_at(state, t_x_pos, t_y_pos);
   set_board_at(state, t_x_pos, t_y_pos, ' ');
-  printf("after blanking tail\n");
+  /* printf("after blanking tail\n");
   for (rows = 0; rows < state->y_size; rows += 1) {
     printf("%s", state->board[rows]);
-  }
+  } */
 
   state->snakes[snum].tail_x += incr_x(tail);
   state->snakes[snum].tail_y += incr_y(tail);
   t_x_pos = state->snakes[snum].tail_x;
   t_y_pos = state->snakes[snum].tail_y;
-  printf("expected tail: %c\n", tail);
-  set_board_at(state, t_x_pos, t_y_pos, tail);
-  printf("after updating tail\n");
+  //printf("prev tail: %c\n", tail);
+  next = get_board_at(state, t_x_pos, t_y_pos);
+  //printf("next tail: %c\n", next);
+  set_board_at(state, t_x_pos, t_y_pos, body_to_tail(next));
+  //printf("after updating tail\n");
   for (rows = 0; rows < state->y_size; rows += 1) {
     printf("%s", state->board[rows]);
   }
   
-  printf("coords: (%d, %d), char: %c\n", t_x_pos, t_y_pos, get_board_at(state, t_x_pos, t_y_pos));
+  //printf("coords: (%d, %d), char: %c\n", t_x_pos, t_y_pos, get_board_at(state, t_x_pos, t_y_pos));
   //set_board_at(state, t_x_pos, t_y_pos, body_to_tail(get_board_at(state, t_x_pos, t_y_pos)));
   
-  printf("at end update_tail\n");
+  //printf("at end update_tail\n");
   // always shrinks tail if called
 
   return;
