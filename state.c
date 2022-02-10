@@ -55,7 +55,7 @@ game_state_t* create_default_state() {
     "#            #\n"
     "##############\n";
 
-  basic->board = malloc(sizeof(char*)*(basic->x_size + 1)*basic->y_size);
+  basic->board = malloc(sizeof(char*)*basic->y_size);
   // STORED AS STRING LITERAL, not an actual array that can be modified
   for (counter = 0; counter < basic->y_size; counter += 1) {
     basic->board[counter] = malloc(sizeof(char)*basic->x_size + 2);
@@ -303,33 +303,33 @@ void update_state(game_state_t* state, int (*add_food)(game_state_t* state)) {
   int total_sneks;
   int rows;
 
-  printf("at update_state\n");
+  //printf("at update_state\n");
   fruit_eaten = 0;
   
   total_sneks = state->num_snakes;
 
   for (counter = 0; counter < total_sneks; counter += 1) {
-    printf("start counter = %d\n", counter);
+    /*printf("start counter = %d\n", counter);
     for (rows = 0; rows < state->y_size; rows += 1) {
       printf("%s", state->board[rows]);
-    }
+    }*/
     if (next_square(state, counter) == '*') {
       fruit_eaten = 1;
     }
     update_head(state, counter);
-    printf("after head but before update tail\n");
-    for (rows = 0; rows < state->y_size; rows += 1) {
-      printf("%s", state->board[rows]);
-    }
+    //printf("after head but before update tail\n");
+    //for (rows = 0; rows < state->y_size; rows += 1) {
+    //  printf("%s", state->board[rows]);
+    //}
     if (fruit_eaten == 0 && state->snakes[counter].live) {
-      printf("update tail triggered\n");
+      //printf("update tail triggered\n");
       update_tail(state, counter);
     } 
     else if (state->snakes[counter].live) {
       fruit_eaten = 0;
       add_food(state);
     }
-    //else {
+    /*else {
     //  fruit_eaten = 0;
     //  add_food(state);
     //}
@@ -337,10 +337,10 @@ void update_state(game_state_t* state, int (*add_food)(game_state_t* state)) {
     for (rows = 0; rows < state->y_size; rows += 1) {
       printf("%s", state->board[rows]);
     }
-    printf("end counter = %d\n", counter);
+    printf("end counter = %d\n", counter); */
   }
 
-  printf("at end update_state\n");
+  //printf("at end update_state\n");
 }
 
 /* Task 5 */
@@ -353,41 +353,79 @@ game_state_t* load_board(char* filename) {
   int size;
   int updated_x;
 
-  //printf("at load_board\n");
-  char str[2] = "\0";
+  printf("at load_board\n");
+  char str[2] = {'\0', '\0'};
+  printf("load_board checkpoint A \n");
 
   basic = malloc(sizeof(game_state_t));
   fptr = fopen(filename, "r");
+  printf("load_board checkpoint B \n");
   if (fptr == NULL) {
     printf("File DNE.\n");
     exit(1);
   }
   fseek(fptr, 0L, SEEK_END);
   size = ftell(fptr);
+  printf("load_board checkpoint C \n");
   rewind(fptr);
+  printf("load_board checkpoint D \n");
+
+  basic->board = malloc(sizeof(char*));
+  basic->board[0] = malloc(sizeof(char)*2);
 
   //basic->board = malloc(size + sizeof(char));
-  basic->board = malloc(size);
-  updated_x = 0;
-
-  for (counter = 0, row = 0; counter < size && !feof(fptr); counter += 1) {
+  // basic->board = malloc(size); 
+  // needs to be to pointers
+  // can check for 1 row and then let that standardize it from then on
+  // need to copy board and check for snakes
+  for (counter = 0, row = 0; counter < size && feof(fptr) == 0 && row < 1; counter += 1) {
+    printf("load_board checkpoint E, counter: %d, row: %d \n", counter, row);
     str[0] = fgetc(fptr);
+    // gets string but didn't update the board
+    //printf("str[0]: %c\n", str[0]);
+    strcat(basic->board[row], str);
+    basic->board[0] = realloc(basic->board[0], sizeof(basic->board[0]) + sizeof(char));
     if (str[0] == '\n') {
+      //printf("before copy w/ newline, counter: %d, row: %d \n", counter, row);
+      //printf("str: %s\n", str);
+      //printf("after copy w/ newline, counter: %d, row: %d \n", counter, row);
       row += 1;
       if (updated_x == 0) {
         basic->x_size = counter;
-        updated_x = 1;
       }
+      printf("load_board checkpoint E.newline, counter: %d, row: %d \n", counter, row);
     } 
-    else {
-      strcat(basic->board[row], str);
-    }
+    printf("load_board checkpoint E.end of if-else, counter: %d, row: %d \n", counter, row);
   }
+  printf("row 0: %s\n", basic->board[0]);
+  printf("load_board checkpoint F (first row completed)\n");
+
+  basic->board = realloc(basic->board, sizeof(basic->board) + sizeof(char*));
+  basic->board[row] = malloc(basic->x_size);
+
+// havent finished setting up the things for reading it after the first row
+  for (; counter < size && feof(fptr) == 0; counter += 1) {
+    printf("load_board checkpoint E, counter: %d, row: %d \n", counter, row);
+    str[0] = fgetc(fptr);
+    strcat(basic->board[row], str);
+    basic->board[0] = realloc(basic->board[0], sizeof(basic->board[0]) + sizeof(char));
+    if (str[0] == '\n') {
+      if (updated_x == 0) {
+        basic->x_size = counter;
+      }
+      printf("load_board checkpoint E.newline, counter: %d, row: %d \n", counter, row);
+    } 
+  
+  }
+
+
   fclose(fptr);
   basic->y_size = row;
   
-
-  //printf("at end load_board\n");
+  //for (rows = 0; rows < state->y_size; rows += 1) {
+  //  printf("%s", basic->board[rows]);
+  //}
+  printf("at end load_board\n");
   return basic;
 }
 
