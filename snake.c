@@ -31,22 +31,42 @@ int main(int argc, char* argv[]) {
   // Read board from file, or create default board if no input filename was given
   if (in_filename != NULL) {
     // TODO: load the board from in_filename into state...
-    // TODO: ...then call initialize_snakes on the state you made
+    FILE f_in;
+    f_in = fopen(in_filename, "r");
+    if (f_in == NULL) {
+      state = create_default_state();
+    }
+    else {
+      state = load_board(in_filename);
+      // TODO: ...then call initialize_snakes on the state you made
+      state = initialize_snakes(state);
+    }
   } else {
     // TODO: create the default state in state
+    state = create_default_state();
   }
 
   // TODO: Update state. Use the deterministic_food function
   // (already implemented in state_utils.h) to add food.
+  update_state(state, deterministic_food);
 
   // Write updated board to file, or print to stdout if no output filename was given
   if (out_filename != NULL) {
-    // TODO: save the board to out_filename
+    FILE f_out = fopen(out_filename, "w");
+    if (f_out == NULL) {
+      show_board(state);
+    }
+    else {
+      print_board(state, f_out);
+      fclose(f_out);
+    }
   } else {
     // TODO: print the board to stdout
+    show_board(state);
   }
 
   // TODO: free any allocated memory
+  free_state(state);
 
   return 0;
 }

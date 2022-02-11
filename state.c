@@ -39,8 +39,6 @@ static void show_board(game_state_t* state) {
 
 /* Task 1 */
 game_state_t* create_default_state() {
-  // TODO: Implement this function.
-
   game_state_t* basic;
   char* basic_state;
   int counter;
@@ -63,15 +61,12 @@ game_state_t* create_default_state() {
     "##############\n";
 
   basic->board = malloc(sizeof(char*)*basic->y_size);
-  // STORED AS STRING LITERAL, not an actual array that can be modified
   for (counter = 0; counter < basic->y_size; counter += 1) {
     basic->board[counter] = malloc(sizeof(char)*basic->x_size + 2);
     start_index = counter*(basic->x_size + 1);
     strncpy(basic->board[counter], &basic_state[start_index], basic->x_size + 1);
     basic->board[counter][basic->x_size + 1] = '\0';
   }
-
-
   basic->snakes = malloc(sizeof(snake_t*));
   basic->snakes[0].head_x = 5;
   basic->snakes[0].head_y = 4;
@@ -86,7 +81,6 @@ game_state_t* create_default_state() {
 
 /* Task 2 */
 void free_state(game_state_t* state) {
-  // TODO: Implement this function.
   int counter;
   for (counter = 0; counter < state->y_size; counter += 1) {
     free(state->board[counter]);
@@ -103,7 +97,6 @@ void print_board(game_state_t* state, FILE* fp) {
   for (rows = 0; rows < state->y_size; rows += 1) {
     fprintf(fp, "%s", state->board[rows]);
   }
-  //fprintf(fp, "\n");
   return;
 }
 
@@ -116,7 +109,6 @@ void save_board(game_state_t* state, char* filename) {
 
 /* Task 4.1 */
 static bool is_tail(char c) {
-  // TODO: Implement this function.
   char snek_set[] = "wasd";
   if (strchr(snek_set, c) == NULL) {
     return false;
@@ -125,7 +117,6 @@ static bool is_tail(char c) {
 }
 
 static bool is_snake(char c) {
-  // TODO: Implement this function.
   char snek_set[] = "wasd^<>vx";
   if (strchr(snek_set, c) == NULL) {
     return false;
@@ -134,7 +125,6 @@ static bool is_snake(char c) {
 }
 
 static char body_to_tail(char c) {
-  // TODO: Implement this function.
   switch (c) {
     case '^':
       return 'w';
@@ -149,7 +139,6 @@ static char body_to_tail(char c) {
 }
 
 static int incr_x(char c) {
-  // TODO: Implement this function.
   switch (c) {
     case 'd':
     case '>':
@@ -162,7 +151,6 @@ static int incr_x(char c) {
 }
 
 static int incr_y(char c) {
-  // TODO: Implement this function.
   switch (c) {
     case 's':
     case 'v':
@@ -176,7 +164,6 @@ static int incr_y(char c) {
 
 /* Task 4.2 */
 static char next_square(game_state_t* state, int snum) {
-  // TODO: Implement this function.
   int x_pos;
   int y_pos;
   char head;
@@ -188,7 +175,6 @@ static char next_square(game_state_t* state, int snum) {
 
 /* Task 4.3 */
 static void update_head(game_state_t* state, int snum) {
-  // TODO: Implement this function.
   char next;
   int h_x_pos;
   int h_y_pos;
@@ -218,12 +204,10 @@ static void update_head(game_state_t* state, int snum) {
 
 /* Task 4.4 */
 static void update_tail(game_state_t* state, int snum) {
-  // TODO: Implement this function.
   int t_x_pos;
   int t_y_pos;
   char tail;
   char next; 
-  int rows;
   t_x_pos = state->snakes[snum].tail_x;
   t_y_pos = state->snakes[snum].tail_y;
   tail = get_board_at(state, t_x_pos, t_y_pos);
@@ -240,11 +224,9 @@ static void update_tail(game_state_t* state, int snum) {
 
 /* Task 4.5 */
 void update_state(game_state_t* state, int (*add_food)(game_state_t* state)) {
-  // TODO: Implement this function.
   int counter;
   int fruit_eaten;
   int total_sneks;
-  int rows;
 
   fruit_eaten = 0;
   total_sneks = state->num_snakes;
@@ -265,13 +247,10 @@ void update_state(game_state_t* state, int (*add_food)(game_state_t* state)) {
 
 
 game_state_t* load_board(char* filename) {
-  // TODO: Implement this function.
   game_state_t* basic;
   FILE *fptr;
   int row;
   int counter;
-  int size;
-  int iterator;
   int row_size;
   int new_row;
   char str[2] = {'\0', '\0'};
@@ -283,12 +262,7 @@ game_state_t* load_board(char* filename) {
     printf("File DNE.\n");
     exit(1);
   }
-
-  /*while(feof(fptr) == 0) {
-    printf("%c", fgetc(fptr));
-  }
-
-  rewind(fptr); */
+  
   rewind(fptr);
 
   basic->board = malloc(sizeof(char*));
@@ -335,30 +309,21 @@ game_state_t* load_board(char* filename) {
 
 /* Task 6.1 */
 static void find_head(game_state_t* state, int snum) {
-  // TODO: Implement this function.
   int curr_x;
   int curr_y;
   char next;
   char curr;
-  int rows;
-  //show_board(state);
-
-  //printf("at find_head\n");
+  
   curr_x = state->snakes[snum].tail_x;
   curr_y = state->snakes[snum].tail_y;
   curr = get_board_at(state, curr_x,  curr_y);
   next = get_board_at(state, curr_x + incr_x(curr), curr_y + incr_y(curr));
-  //printf("curr: %c at (%d, %d), next: %c at (%d, %d)\n", curr, curr_x, curr_y, next, curr_x + incr_x(curr), curr_y + incr_y(curr));
-  // possible that helper functions don't work
-
-
 
   while (is_snake(next)) {
     curr_x += incr_x(curr);
     curr_y += incr_y(curr);
     curr = next;
     next = get_board_at(state, curr_x + incr_x(curr), curr_y + incr_y(curr));
-    //printf("curr: %c at (%d, %d), next: %c at (%d, %d)\n", curr, curr_x, curr_y, next, curr_x + incr_x(curr), curr_y + incr_y(curr));
   }
 
   state->snakes[snum].head_x = curr_x;
@@ -371,19 +336,15 @@ static void find_head(game_state_t* state, int snum) {
     state->snakes[snum].live = 1;
   }
 
-  //printf("at end find_head\n");
   return;
 }
 
 /* Task 6.2 */
 game_state_t* initialize_snakes(game_state_t* state) {
-  // TODO: Implement this function.
   int row;
   int col;
   char curr;
 
-
-  //printf("at initialize_snakes\n");
   state->num_snakes = 0;
   state->snakes = malloc(sizeof(snake_t)*(state->num_snakes));
 
@@ -392,7 +353,6 @@ game_state_t* initialize_snakes(game_state_t* state) {
       curr = get_board_at(state, col, row);
       if (is_tail(curr)) {
         state->snakes = realloc(state->snakes, sizeof(snake_t*)*(state->num_snakes + 1));
-        //state->snakes[state->num_snakes] = malloc(sizeof(snake_t));
         state->snakes[state->num_snakes].tail_x = col;
         state->snakes[state->num_snakes].tail_y = row;
         find_head(state, state->num_snakes);
@@ -401,7 +361,6 @@ game_state_t* initialize_snakes(game_state_t* state) {
     }
   }
 
-  //printf("at end initialize_snakes\n");
   return state;
 }
 
