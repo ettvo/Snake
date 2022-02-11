@@ -38,7 +38,7 @@ game_state_t* create_default_state() {
   int start_index;
 
   basic = malloc(sizeof(game_state_t));
-  basic->x_size = strlen("##############");
+  basic->x_size = 14;
   basic->y_size = 10;
 
   basic_state =
@@ -59,11 +59,11 @@ game_state_t* create_default_state() {
     basic->board[counter] = malloc(sizeof(char)*basic->x_size + 2);
     start_index = counter*(basic->x_size + 1);
     strncpy(basic->board[counter], &basic_state[start_index], basic->x_size + 1);
+    basic->board[counter][basic->x_size + 1] = '\0';
   }
 
 
-  basic->snakes = malloc(sizeof(snake_t));
-  
+  basic->snakes = malloc(sizeof(snake_t*));
   basic->snakes[0].head_x = 5;
   basic->snakes[0].head_y = 4;
   basic->snakes[0].tail_x = 4;
@@ -78,6 +78,10 @@ game_state_t* create_default_state() {
 /* Task 2 */
 void free_state(game_state_t* state) {
   // TODO: Implement this function.
+  int counter;
+  for (counter = 0; counter < state->y_size; counter += 1) {
+    free(state->board[counter]);
+  }
   free(state->board);
   free(state->snakes);
   free(state);
@@ -90,7 +94,7 @@ void print_board(game_state_t* state, FILE* fp) {
   for (rows = 0; rows < state->y_size; rows += 1) {
     fprintf(fp, "%s", state->board[rows]);
   }
-  fprintf(fp, "\n");
+  //fprintf(fp, "\n");
   return;
 }
 
@@ -306,10 +310,16 @@ game_state_t* load_board(char* filename) {
     printf("File DNE.\n");
     exit(1);
   }
+
+  while(feof(fptr) == 0) {
+    printf("%c", fgetc(fptr));
+  }
   
   /* fseek(fptr, 0L, SEEK_END);
   size = ftell(fptr);
   rewind(fptr); */
+
+  rewind(fptr);
 
   basic->board = malloc(sizeof(char*));
   basic->board[0] = malloc(sizeof(char)*2);
@@ -352,9 +362,10 @@ game_state_t* load_board(char* filename) {
       basic->board[row][basic->x_size + 1] = '\0';
       //strcat(basic->board[row], "\0");
       row += 1;
-      new_row = 1;
+      new_row += 1;
     } 
   }
+
   //printf("load_board checkpoint G (rest of rows completed)\n");
 
   
@@ -363,7 +374,7 @@ game_state_t* load_board(char* filename) {
   // change to iterator
 
   
-  //fclose(fptr);
+  fclose(fptr);
   //printf("at end load_board\n");
   return basic;
 }
@@ -396,6 +407,9 @@ static void find_head(game_state_t* state, int snum) {
   if (get_board_at(state, curr_x, curr_y) == 'x') {
     state->snakes[snum].live = 0;
   }
+  else {
+    state->snakes[snum].live = 1;
+  }
 
   //printf("at end find_head\n");
   return;
@@ -411,17 +425,18 @@ game_state_t* initialize_snakes(game_state_t* state) {
 
   //printf("at initialize_snakes\n");
   state->num_snakes = 0;
-  state->snakes = malloc(sizeof(snake_t));
+  state->snakes = malloc(sizeof(snake_t)*(state->num_snakes));
 
   for (row = 0; row < state->y_size; row += 1) {
     for (col = 0; col < state->x_size; col += 1) {
       curr = get_board_at(state, col, row);
       if (is_tail(curr)) {
-        state->snakes = realloc(state->snakes, sizeof(state->snakes) + sizeof(snake_t));
+        state->snakes = realloc(state->snakes, sizeof(snake_t*)*(state->num_snakes + 1));
+        //state->snakes[state->num_snakes] = malloc(sizeof(snake_t));
         state->snakes[state->num_snakes].tail_x = col;
         state->snakes[state->num_snakes].tail_y = row;
+        find_head(state, state->num_snakes);
         state->num_snakes += 1;
-        state->snakes[state->num_snakes].live = 1;
       }
     }
   }
