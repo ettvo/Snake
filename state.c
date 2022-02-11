@@ -261,87 +261,71 @@ game_state_t* load_board(char* filename) {
   int iterator;
   int row_size;
   char str[2] = {'\0', '\0'};
-  printf("load_board checkpoint A \n");
 
   basic = malloc(sizeof(game_state_t));
   fptr = fopen(filename, "r");
-  printf("load_board checkpoint B \n");
   if (fptr == NULL) {
     printf("File DNE.\n");
     exit(1);
   }
   fseek(fptr, 0L, SEEK_END);
   size = ftell(fptr);
-  printf("load_board checkpoint C \n");
   rewind(fptr);
-  printf("load_board checkpoint D \n");
-
-  printf("size before malloc: %ld\n", sizeof(basic->board));
 
   basic->board = malloc(sizeof(char*));
-  //basic->board = realloc(basic->board, sizeof(basic->board) + sizeof(char*));
-  printf("size at beginning: %ld\n", sizeof(basic->board));
   basic->board[0] = malloc(sizeof(char)*2);
 
   for (counter = 0, row = 0; counter < size && feof(fptr) == 0 && row < 1; counter += 1) {
     str[0] = fgetc(fptr);
-    //strncpy(basic->board[row], str, 1);
-    strcat(basic->board[row], str);
     basic->board[0] = realloc(basic->board[0], sizeof(basic->board[0]) + sizeof(char));
+    strcat(basic->board[row], str);
     if (str[0] == '\n') {
+      //basic->board[0] = realloc(basic->board[0], sizeof(basic->board[0]) + sizeof(char));
+      strcat(basic->board[row], "\0");
       row += 1;
       basic->x_size = counter;
-      basic->board[0] = realloc(basic->board[0], sizeof(basic->board[0]) + sizeof(char));
     }   
   }
-  printf("row 0: %s\n", basic->board[0]);
-  row_size = basic->x_size + 2;
-  printf("load_board checkpoint F (first row completed, before first alloc)\n");
-  printf("size after row 0: %ld, %ld, %ld\n", sizeof(basic->board), sizeof(char*), sizeof(basic->board) + sizeof(char*));
-  // error starts here due to corrupted heap in previous section
-  basic->board = realloc(basic->board, sizeof(basic->board) + sizeof(char*));
-  //basic->board = realloc(basic->board, sizeof(char*)*2);
-  printf("after first realloc: %ld, %ld, %ld\n", sizeof(basic->board), sizeof(char*), sizeof(basic->board) + sizeof(char*));
-  // error starts here due to corrupted heap
-  basic->board[row] = malloc(row_size); //2 for newline + terminator
-  printf("first realloc, malloc completed\n");
+  //printf("row 0: %s\n", basic->board[0]);
+  row_size = basic->x_size + 1;
+  basic->board[row] = malloc(row_size);
 
+  
+  basic->board = realloc(basic->board, sizeof(char*)*(row + 1));
   //havent finished setting up the things for reading it after the first row
   for (; counter < size && feof(fptr) == 0; counter += 1) {
     //printf("%ld, %d, %d\n", sizeof(basic->board), sizeof(char*), sizeof(basic->board) + sizeof(char*));
     //printf("load_board checkpoint E, counter: %d, row: %d \n", counter, row);
+  
     str[0] = fgetc(fptr);
-    printf("curr char: %c\n", str[0]);
+    if (row == 3) {
+      printf("curr char: %c\n", str[0]);
+      printf("ddddd row 0: %s\n", basic->board[0]);
+    }
     strcat(basic->board[row], str);
     if (str[0] == '\n') {
       printf("row #: %d, %s\n", row, basic->board[row]);
       basic->board[row] = realloc(basic->board[row], sizeof(basic->board[row]) + sizeof(char));
+      strcat(basic->board[row], "\0");
       row += 1;
+      printf("ddddd before malloc row 0: %s\n", basic->board[0]);
       basic->board[row] = malloc(row_size);
-      printf("before board realloc @ row %d\n", row);
-      if (row == 3) {
-        printf("%s", basic->board[0]);
-        printf("%s", basic->board[1]);
-        printf("%s", basic->board[2]);
-      }
-      printf("Curr size: %ld, +: %ld, Total: %ld\n", sizeof(basic->board), sizeof(char*), sizeof(basic->board) + sizeof(char*));
-      basic->board = realloc(basic->board, sizeof(basic->board) + sizeof(char*));
+      printf("ddddd after malloc row 0: %s\n", basic->board[0]);
+      // * basic->board = realloc(basic->board, sizeof(basic->board) + sizeof(char*));
       //basic->board = realloc(basic->board, sizeof(char*)*row);
       //printf("load_board checkpoint E.newline, counter: %d, row: %d \n", counter, row);
     } 
   
   }
-
-  fclose(fptr);
   printf("load_board checkpoint G (rest of rows completed)\n");
+
+  //fclose(fptr);
 
   basic->y_size = row; 
   // change to iterator
   for (iterator = 0; iterator < basic->y_size; iterator += 1) {
     printf("%s", basic->board[iterator]);
   }
-
-  
   
   
   //for (rows = 0; rows < state->y_size; rows += 1) {
