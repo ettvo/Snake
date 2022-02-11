@@ -17,6 +17,7 @@ static void find_head(game_state_t* state, int snum);
 static char next_square(game_state_t* state, int snum);
 static void update_tail(game_state_t* state, int snum);
 static void update_head(game_state_t* state, int snum);
+static void show_board(game_state_t* state);
 
 /* Helper function to get a character from the board (already implemented for you). */
 static char get_board_at(game_state_t* state, int x, int y) {
@@ -26,6 +27,14 @@ static char get_board_at(game_state_t* state, int x, int y) {
 /* Helper function to set a character on the board (already implemented for you). */
 static void set_board_at(game_state_t* state, int x, int y, char ch) {
   state->board[y][x] = ch;
+}
+
+static void show_board(game_state_t* state) {
+  int rows;
+  for (rows = 0; rows < state->y_size; rows += 1) {
+    printf("%s", state->board[rows]);
+  }
+  return;
 }
 
 /* Task 1 */
@@ -254,42 +263,6 @@ void update_state(game_state_t* state, int (*add_food)(game_state_t* state)) {
   }
 }
 
-/* Task 5 */
-/*
-game_state_t* load_board(char* filename) {
-  // TODO: Implement this function.
-  game_state_t* state;
-  FILE *fptr;
-  int num_cols;
-  int num_rows;
-  int start_of_row;
-  char str[] = {'\0', '\0'};
-
-  state = malloc(sizeof(game_state_t));
-  fptr = fopen(filename, "r");
-
-  // go row 0
-  state->board = malloc(sizeof(char*));
-  state->board[num_rows] = malloc(sizeof(char)*2);
-  
-  for (num_cols = 0, num_rows = 0; num_cols < 1 && feof(fptr) == 0; num_cols += 1) {
-    str[0] = fgetc(fptr);
-    strcat(state->board[num_rows], str[0]);
-    state->board[num_rows] = realloc(sizeof(state->board[num_rows]) + sizeof(char));
-    if (str[0] == '\n') {
-      num_rows += 1;
-    }
-
-
-
-  }
-
-
-  return state;
-
-}
-*/
-
 
 game_state_t* load_board(char* filename) {
   // TODO: Implement this function.
@@ -311,14 +284,11 @@ game_state_t* load_board(char* filename) {
     exit(1);
   }
 
-  while(feof(fptr) == 0) {
+  /*while(feof(fptr) == 0) {
     printf("%c", fgetc(fptr));
   }
-  
-  /* fseek(fptr, 0L, SEEK_END);
-  size = ftell(fptr);
-  rewind(fptr); */
 
+  rewind(fptr); */
   rewind(fptr);
 
   basic->board = malloc(sizeof(char*));
@@ -326,13 +296,8 @@ game_state_t* load_board(char* filename) {
 
   for (counter = 0, row = 0; feof(fptr) == 0 && row == 0; counter += 1) {
     str[0] = fgetc(fptr);
-    //printf("Char: %c, counter: %d\n", str[0], counter);
-    //printf("size so far: %ld\n", sizeof(basic->board[0]));
-    //basic->board[row] = realloc(basic->board[row], sizeof(basic->board[row]) + sizeof(char));
     basic->board[row][counter] = str[0];
-    //strcat(basic->board[row], str);
     if (str[0] == '\n') {
-      // basic->board[row] = realloc(basic->board[row], sizeof(basic->board[row]) + sizeof(char));
       basic->board[row][counter + 1] = '\0';
       row += 1;
       basic->x_size = counter;
@@ -347,35 +312,23 @@ game_state_t* load_board(char* filename) {
 
   for (; feof(fptr) == 0; counter += 1) {
     if (new_row) {
-      //printf("ddddd before malloc row 0: %s\n", basic->board[0]);
       basic->board = realloc(basic->board, sizeof(char*)*(row + 1));
       basic->board[row] = malloc(row_size*sizeof(char));
-      //printf("ddddd after malloc row 0: %s\n", basic->board[0]);
       new_row = 0;
     }
 
     str[0] = fgetc(fptr);
     strcat(basic->board[row], str);
     if (str[0] == '\n') {
-      //printf("row #: %d, %s\n", row, basic->board[row]);
-      //basic->board[row] = realloc(basic->board[row], sizeof(basic->board[row]) + sizeof(char));
       basic->board[row][basic->x_size + 1] = '\0';
-      //strcat(basic->board[row], "\0");
       row += 1;
       new_row += 1;
     } 
   }
 
-  //printf("load_board checkpoint G (rest of rows completed)\n");
-
-  
-
   basic->y_size = row; 
-  // change to iterator
-
-  
   fclose(fptr);
-  //printf("at end load_board\n");
+
   return basic;
 }
 
@@ -387,18 +340,25 @@ static void find_head(game_state_t* state, int snum) {
   int curr_y;
   char next;
   char curr;
+  int rows;
+  //show_board(state);
 
   //printf("at find_head\n");
   curr_x = state->snakes[snum].tail_x;
   curr_y = state->snakes[snum].tail_y;
   curr = get_board_at(state, curr_x,  curr_y);
   next = get_board_at(state, curr_x + incr_x(curr), curr_y + incr_y(curr));
+  //printf("curr: %c at (%d, %d), next: %c at (%d, %d)\n", curr, curr_x, curr_y, next, curr_x + incr_x(curr), curr_y + incr_y(curr));
+  // possible that helper functions don't work
 
-  while (next != ' ' && next != '#') {
-    curr_x += incr_x(next);
-    curr_y += incr_y(next);
-    curr = get_board_at(state, curr_x, curr_y);
+
+
+  while (is_snake(next)) {
+    curr_x += incr_x(curr);
+    curr_y += incr_y(curr);
+    curr = next;
     next = get_board_at(state, curr_x + incr_x(curr), curr_y + incr_y(curr));
+    //printf("curr: %c at (%d, %d), next: %c at (%d, %d)\n", curr, curr_x, curr_y, next, curr_x + incr_x(curr), curr_y + incr_y(curr));
   }
 
   state->snakes[snum].head_x = curr_x;
