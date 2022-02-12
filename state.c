@@ -308,7 +308,7 @@ game_state_t* load_board(char* filename) {
       //printf("checkpoint C @ counter: %d, new row: %d\n", counter, row);
       //printf("size of board: %ld, expected new size: %ld\n", sizeof(basic->board), sizeof(char)*(row_size));
       basic->board = (char**)realloc(basic->board, sizeof(char*)*(row + 1));
-      basic->board[row] = (char*)malloc(row_size * sizeof(char));
+      basic->board[row] = (char*)malloc((row_size + 1)* sizeof(char));
       new_row = 0;
     }
 
