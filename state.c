@@ -266,18 +266,19 @@ game_state_t* load_board(char* filename) {
   char str[2] = {'\0', '\0'};
 
   basic = (game_state_t*)malloc(sizeof(game_state_t));
-  basic->snakes = NULL;
+  basic->num_snakes = 0;
   fptr = fopen(filename, "r");
 
   if (fptr == NULL) {
     //return NULL;
+    fclose(fptr);
     return create_default_state();
     //printf("File DNE.\n");
     //exit(1);
   }
   
   rewind(fptr);
-  printf("checkpoint A\n");
+  //printf("checkpoint A\n");
 
   basic->board = (char**)malloc(sizeof(char*));
   basic->board[0] = (char*)malloc(sizeof(char)*2);
@@ -296,7 +297,7 @@ game_state_t* load_board(char* filename) {
   }
   
   row_size = basic->x_size + 1;
-  printf("checkpoint B\n");
+  //printf("checkpoint B\n");
   //basic->board[row] = (char*)malloc(row_size * sizeof(char));
 
   //basic->board = (char**)realloc(basic->board, sizeof(char*)*(row + 1)); // or + 1
@@ -304,17 +305,18 @@ game_state_t* load_board(char* filename) {
 
   for (; feof(fptr) == 0; counter += 1) {
     if (new_row) {
-      printf("checkpoint C @ counter: %d, new row: %d\n", counter, row);
-      printf("size of board: %ld, expected new size: %ld\n", sizeof(basic->board), sizeof(char)*(row_size));
+      //printf("checkpoint C @ counter: %d, new row: %d\n", counter, row);
+      //printf("size of board: %ld, expected new size: %ld\n", sizeof(basic->board), sizeof(char)*(row_size));
       basic->board = (char**)realloc(basic->board, sizeof(char*)*(row + 1));
       basic->board[row] = (char*)malloc(row_size * sizeof(char));
       new_row = 0;
     }
 
     str[0] = fgetc(fptr);
-    strcat(basic->board[row], str);
+    basic->board[row][counter % (basic->x_size + 1)] = str[0];
+    //strcat(basic->board[row], str);
     if (str[0] == '\n') {
-      basic->board[row][basic->x_size + 1] = '\0';
+      //basic->board[row][basic->x_size + 1] = '\0';
       row += 1;
       new_row = 1;
     } 
@@ -365,19 +367,19 @@ game_state_t* initialize_snakes(game_state_t* state) {
   int col;
   char curr;
 
-  state->num_snakes = 0;
-
-  state->snakes = (snake_t*)malloc(sizeof(snake_t)*(state->num_snakes));
-
-  for (row = 0; row < state->y_size; row += 1) {
-    for (col = 0; col < state->x_size; col += 1) {
-      curr = get_board_at(state, col, row);
-      if (is_tail(curr)) {
-        state->snakes = (snake_t*)realloc(state->snakes, sizeof(snake_t)*(state->num_snakes + 1));
-        state->snakes[state->num_snakes].tail_x = col;
-        state->snakes[state->num_snakes].tail_y = row;
-        find_head(state, state->num_snakes);
-        state->num_snakes += 1;
+  if (state->num_snakes == 0) {
+    state->num_snakes = 0;
+    state->snakes = (snake_t*)malloc(sizeof(snake_t));
+    for (row = 0; row < state->y_size; row += 1) {
+      for (col = 0; col < state->x_size; col += 1) {
+        curr = get_board_at(state, col, row);
+        if (is_tail(curr)) {
+          state->snakes = (snake_t*)realloc(state->snakes, sizeof(snake_t)*(state->num_snakes + 1));
+          state->snakes[state->num_snakes].tail_x = col;
+          state->snakes[state->num_snakes].tail_y = row;
+          find_head(state, state->num_snakes);
+          state->num_snakes += 1;
+        }
       }
     }
   }
