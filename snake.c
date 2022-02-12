@@ -31,17 +31,17 @@ int main(int argc, char* argv[]) {
   // Read board from file, or create default board if no input filename was given
   if (in_filename != NULL) {
     // TODO: load the board from in_filename into state...
-    FILE f_in;
-    f_in = fopen(in_filename, "r");
-    if (f_in == NULL) {
+    state = load_board(in_filename);
+    // TODO: ...then call initialize_snakes on the state you made
+    if (state == NULL) {
       state = create_default_state();
-    }
+    } 
     else {
-      state = load_board(in_filename);
-      // TODO: ...then call initialize_snakes on the state you made
       state = initialize_snakes(state);
     }
-  } else {
+    // double snakes from create_default_state?
+  }
+  else {
     // TODO: create the default state in state
     state = create_default_state();
   }
@@ -52,17 +52,11 @@ int main(int argc, char* argv[]) {
 
   // Write updated board to file, or print to stdout if no output filename was given
   if (out_filename != NULL) {
-    FILE f_out = fopen(out_filename, "w");
-    if (f_out == NULL) {
-      show_board(state);
-    }
-    else {
-      print_board(state, f_out);
-      fclose(f_out);
-    }
-  } else {
+    print_board(state, fopen(out_filename, "w"));
+  } 
+  else {
     // TODO: print the board to stdout
-    show_board(state);
+    print_board(state, NULL);
   }
 
   // TODO: free any allocated memory

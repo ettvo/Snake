@@ -40,11 +40,12 @@ static void show_board(game_state_t* state) {
 /* Task 1 */
 game_state_t* create_default_state() {
   game_state_t* basic;
+  //game_state_t state;
   char* basic_state;
   int counter;
   int start_index;
 
-  basic = malloc(sizeof(game_state_t));
+  basic = (game_state_t*)malloc(sizeof(game_state_t));
   basic->x_size = 14;
   basic->y_size = 10;
 
@@ -60,14 +61,16 @@ game_state_t* create_default_state() {
     "#            #\n"
     "##############\n";
 
-  basic->board = malloc(sizeof(char*)*basic->y_size);
+  basic->board = (char**)malloc(sizeof(char*)*basic->y_size);
   for (counter = 0; counter < basic->y_size; counter += 1) {
-    basic->board[counter] = malloc(sizeof(char)*basic->x_size + 2);
+    basic->board[counter] = (char*)malloc(sizeof(char)*basic->x_size + 2); // might be + 1 or + 2
     start_index = counter*(basic->x_size + 1);
     strncpy(basic->board[counter], &basic_state[start_index], basic->x_size + 1);
     basic->board[counter][basic->x_size + 1] = '\0';
   }
-  basic->snakes = malloc(sizeof(snake_t*));
+
+  
+  basic->snakes = (snake_t*)malloc(sizeof(snake_t));
   basic->snakes[0].head_x = 5;
   basic->snakes[0].head_y = 4;
   basic->snakes[0].tail_x = 4;
@@ -75,6 +78,7 @@ game_state_t* create_default_state() {
   basic->snakes[0].live = 1;
 
   basic->num_snakes = 1;
+  //basic = initialize_snakes(basic);
   return basic;
 
 }
@@ -94,9 +98,15 @@ void free_state(game_state_t* state) {
 /* Task 3 */
 void print_board(game_state_t* state, FILE* fp) {
   int rows;
+  if (fp == NULL) {
+    show_board(state);
+    return;
+  }
   for (rows = 0; rows < state->y_size; rows += 1) {
     fprintf(fp, "%s", state->board[rows]);
   }
+  //fclose(fp);
+  //free(fp);
   return;
 }
 
@@ -255,22 +265,29 @@ game_state_t* load_board(char* filename) {
   int new_row;
   char str[2] = {'\0', '\0'};
 
-  basic = malloc(sizeof(game_state_t));
+  basic = (game_state_t*)malloc(sizeof(game_state_t));
+  basic->snakes = NULL;
   fptr = fopen(filename, "r");
 
   if (fptr == NULL) {
-    printf("File DNE.\n");
-    exit(1);
+    //return NULL;
+    return create_default_state();
+    //printf("File DNE.\n");
+    //exit(1);
   }
   
   rewind(fptr);
+  printf("checkpoint A\n");
 
-  basic->board = malloc(sizeof(char*));
-  basic->board[0] = malloc(sizeof(char)*2);
+  basic->board = (char**)malloc(sizeof(char*));
+  basic->board[0] = (char*)malloc(sizeof(char)*2);
+  basic->x_size = 0;
+  basic->y_size = 0;
 
   for (counter = 0, row = 0; feof(fptr) == 0 && row == 0; counter += 1) {
     str[0] = fgetc(fptr);
     basic->board[row][counter] = str[0];
+    basic->board[0] = (char*)realloc(basic->board[0], sizeof(char)*(counter + 2));
     if (str[0] == '\n') {
       basic->board[row][counter + 1] = '\0';
       row += 1;
@@ -279,15 +296,18 @@ game_state_t* load_board(char* filename) {
   }
   
   row_size = basic->x_size + 1;
-  basic->board[row] = malloc(row_size * sizeof(char));
+  printf("checkpoint B\n");
+  //basic->board[row] = (char*)malloc(row_size * sizeof(char));
 
-  basic->board = realloc(basic->board, sizeof(char*)*(row + 1));
-  new_row = 0;
+  //basic->board = (char**)realloc(basic->board, sizeof(char*)*(row + 1)); // or + 1
+  new_row = 1;
 
   for (; feof(fptr) == 0; counter += 1) {
     if (new_row) {
-      basic->board = realloc(basic->board, sizeof(char*)*(row + 1));
-      basic->board[row] = malloc(row_size*sizeof(char));
+      printf("checkpoint C @ counter: %d, new row: %d\n", counter, row);
+      printf("size of board: %ld, expected new size: %ld\n", sizeof(basic->board), sizeof(char)*(row_size));
+      basic->board = (char**)realloc(basic->board, sizeof(char*)*(row + 1));
+      basic->board[row] = (char*)malloc(row_size * sizeof(char));
       new_row = 0;
     }
 
@@ -296,7 +316,7 @@ game_state_t* load_board(char* filename) {
     if (str[0] == '\n') {
       basic->board[row][basic->x_size + 1] = '\0';
       row += 1;
-      new_row += 1;
+      new_row = 1;
     } 
   }
 
@@ -346,13 +366,14 @@ game_state_t* initialize_snakes(game_state_t* state) {
   char curr;
 
   state->num_snakes = 0;
-  state->snakes = malloc(sizeof(snake_t)*(state->num_snakes));
+
+  state->snakes = (snake_t*)malloc(sizeof(snake_t)*(state->num_snakes));
 
   for (row = 0; row < state->y_size; row += 1) {
     for (col = 0; col < state->x_size; col += 1) {
       curr = get_board_at(state, col, row);
       if (is_tail(curr)) {
-        state->snakes = realloc(state->snakes, sizeof(snake_t*)*(state->num_snakes + 1));
+        state->snakes = (snake_t*)realloc(state->snakes, sizeof(snake_t)*(state->num_snakes + 1));
         state->snakes[state->num_snakes].tail_x = col;
         state->snakes[state->num_snakes].tail_y = row;
         find_head(state, state->num_snakes);
