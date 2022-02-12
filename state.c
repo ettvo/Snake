@@ -316,7 +316,7 @@ game_state_t* load_board(char* filename) {
     basic->board[row][counter % (basic->x_size + 1)] = str[0];
     //strcat(basic->board[row], str);
     if (str[0] == '\n') {
-      //basic->board[row][basic->x_size + 1] = '\0';
+      basic->board[row][basic->x_size + 1] = '\0';
       row += 1;
       new_row = 1;
     } 
